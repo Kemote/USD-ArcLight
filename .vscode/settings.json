@@ -1,0 +1,9 @@
+{
+    "python.analysis.packageIndexDepths": [
+        {
+            "name": "pxr",
+            "depth": 10,
+        }
+    ],
+    "python.analysis.typeCheckingMode": "basic"
+}

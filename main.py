@@ -1,2 +1,3 @@
-from pxr import Sdf
+import pxr
+
 
