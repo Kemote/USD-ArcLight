@@ -1,10 +1,9 @@
 import os
-
-
-import PySide6
+from pxr import Usd
 
 
 def open_stage(path):
+    stage = None
     if os.path.exists(path):
-        import PySide6
-        
+        stage = Usd.Stage.Open(path)
+    return stage
