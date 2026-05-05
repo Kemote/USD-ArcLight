@@ -31,19 +31,17 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         file_menu.addAction(open_action)
 
         # create USD tree view
-        self.usd_tree_model = UsdTreeModel(["Name", "Type"])
+        self.usd_tree_model = UsdTreeModel(["PrimName", "PrimSpec"])
         self.usd_tree_delegate = UsdTreeDelegate()
         self.usd_tree_view = UsdTreeView()
         self.usd_tree_view.setModel(self.usd_tree_model)
         self.usd_tree_view.setItemDelegate(self.usd_tree_delegate)
 
-
         # Adding sample items
-        root = self.usd_tree_model.root_item
-        folder1 = UsdTreeItem(["Documents", "Folder"], root)
-        root.append_child(folder1)
-        folder1.append_child(UsdTreeItem(["Resume.pdf", "File"], folder1))
-
+        # root = self.usd_tree_model.root_item
+        # folder1 = UsdTreeItem(["Documents", "Folder"], root)
+        # root.append_child(folder1)
+        # folder1.append_child(UsdTreeItem(["Resume.pdf", "File"], folder1))
 
         # create main layout
         self.main_layout = QtWidgets.QGridLayout()
@@ -70,15 +68,27 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         jiuz gotowa kompozycja.
 
         """
-        for prim in self.stage.TraverseAll():
-            print()
-            print(prim)
+        self.usd_tree_model.clear_tree()
+
+        parent_nodes = {"": self.usd_tree_model.root_item}
+        for prim in self.stage.TraverseAll(): # type: ignore
+            prim_path = prim.GetPrimPath()
+            parent_path = prim_path.pathString.removesuffix(f"/{prim_path.name}")
+            parent_item = parent_nodes.get(parent_path)
+            new_item = UsdTreeItem([prim_path.name, prim.GetSpecifier().name], parent_item)
+            parent_nodes[prim_path.pathString] = new_item
+            parent_item.append_child(new_item)
+            # TODO, todaj ten stack ktory tworzy prim!!!
+            # print()
+            # print(prim)
             # Prim stack zwraca w kolejnosci od namocniejszej to nahjslabszej opini pobranej z prima?
             # jakos rpzekminic jak zebrac czym ta opinia jest tzn czy lokal czy variantset etc?
             # moze dodac tu jakis sposob na zmiane ich kolejnosci zeby cos zasymulowac? Wtedy zabarwic 
             # calosc na inny kolor?
-            print(prim.GetPrimStack())
-
+            # prim_path = prim.GetPath()
+            # for sub_prim_path in prim_path.split("/")
+            # prim_stack = prim.GetPrimStack()
+            
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
