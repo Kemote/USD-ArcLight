@@ -37,16 +37,17 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         self.usd_tree_view.setModel(self.usd_tree_model)
         self.usd_tree_view.setItemDelegate(self.usd_tree_delegate)
 
-        # Adding sample items
-        # root = self.usd_tree_model.root_item
-        # folder1 = UsdTreeItem(["Documents", "Folder"], root)
-        # root.append_child(folder1)
-        # folder1.append_child(UsdTreeItem(["Resume.pdf", "File"], folder1))
+        # create list widget for prim stack
+        self.prim_stack_list = QtWidgets.QListWidget()
 
         # create main layout
         self.main_layout = QtWidgets.QGridLayout()
         self.central_widget.setLayout(self.main_layout )
         self.main_layout.addWidget(self.usd_tree_view, 0, 0)
+        self.main_layout.addWidget(self.prim_stack_list, 1, 0)
+
+        #connect signals
+        self.usd_tree_view.selection_changed_signal.connect(self._refresh_prim_stack)
 
     def _open_layer(self):
         open_dialog = QtWidgets.QFileDialog(self)
@@ -75,9 +76,13 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
             prim_path = prim.GetPrimPath()
             parent_path = prim_path.pathString.removesuffix(f"/{prim_path.name}")
             parent_item = parent_nodes.get(parent_path)
-            new_item = UsdTreeItem([prim_path.name, prim.GetSpecifier().name], parent_item)
+            new_item = UsdTreeItem([prim_path.name, 
+                                    prim.GetSpecifier().name,
+                                    prim.GetPrimStack()],
+                                    parent_item)
             parent_nodes[prim_path.pathString] = new_item
             parent_item.append_child(new_item)
+            
             # TODO, todaj ten stack ktory tworzy prim!!!
             # print()
             # print(prim)
@@ -88,7 +93,17 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
             # prim_path = prim.GetPath()
             # for sub_prim_path in prim_path.split("/")
             # prim_stack = prim.GetPrimStack()
-            
+
+    def _refresh_prim_stack(self, selection_list):
+        self.prim_stack_list.clear()
+        selected_index = selection_list[0]
+        if selected_index:
+            item_object = selected_index.internalPointer()
+            if item_object:
+                print(item_object.prim_stack)
+                self.prim_stack_list.addItems(item_object.prim_stack)
+            # zmien widget listy na widgets tablicy...
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)

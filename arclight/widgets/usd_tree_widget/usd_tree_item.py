@@ -4,6 +4,18 @@ class UsdTreeItem:
         self.parent_item = parent_item
         self.child_items = []
 
+    @property
+    def prim_stack(self):
+        stack_str_list = []
+        stack = self.item_data[2]
+        for prim in stack:
+            layer_path = prim.layer.realPath
+            prim_path = prim.path
+            prim_spec = prim.specifier
+            stack_str = f"{layer_path}   {prim_path}" 
+            stack_str_list.append(stack_str)
+        return stack_str_list
+
     def append_child(self, child):
         self.child_items.append(child)
 
@@ -16,3 +28,4 @@ class UsdTreeItem:
     def row(self):
         if self.parent_item:
             return self.parent_item.child_items.index(self)
+        
