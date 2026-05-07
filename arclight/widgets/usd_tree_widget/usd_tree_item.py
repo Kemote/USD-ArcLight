@@ -6,15 +6,14 @@ class UsdTreeItem:
 
     @property
     def prim_stack(self):
-        stack_str_list = []
+        stack_list = []
         stack = self.item_data[2]
         for prim in stack:
             layer_path = prim.layer.realPath
             prim_path = prim.path
             prim_spec = prim.specifier
-            stack_str = f"{layer_path}   {prim_path}" 
-            stack_str_list.append(stack_str)
-        return stack_str_list
+            stack_list.append([layer_path, prim_path, prim_spec])
+        return stack_list
 
     def append_child(self, child):
         self.child_items.append(child)

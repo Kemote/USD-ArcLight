@@ -38,13 +38,19 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         self.usd_tree_view.setItemDelegate(self.usd_tree_delegate)
 
         # create list widget for prim stack
-        self.prim_stack_list = QtWidgets.QListWidget()
+        self.prim_stack_table = QtWidgets.QTableWidget()
+        self.prim_stack_table.setSizeAdjustPolicy(
+            QtWidgets.QTableWidget.SizeAdjustPolicy.AdjustToContents)
+        self.prim_stack_table.setColumnCount(3)
+        columns_headers = ["Layer path:", "Prim path:", "Prim specifier:"]
+        self.prim_stack_table.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
+        self.prim_stack_table.setHorizontalHeaderLabels(columns_headers)
 
         # create main layout
         self.main_layout = QtWidgets.QGridLayout()
-        self.central_widget.setLayout(self.main_layout )
+        self.central_widget.setLayout(self.main_layout)
         self.main_layout.addWidget(self.usd_tree_view, 0, 0)
-        self.main_layout.addWidget(self.prim_stack_list, 1, 0)
+        self.main_layout.addWidget(self.prim_stack_table, 1, 0)
 
         #connect signals
         self.usd_tree_view.selection_changed_signal.connect(self._refresh_prim_stack)
@@ -64,6 +70,7 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
 
     def _load_stage_to_tree(self):
         """
+        INFO
         Sdf.Layer.Traverse rozni sie do Usd.Stage.Traverse tym, ze ten pierwszy
         PrimSpec w zasadzie ejst swego rodzaju opinia w USD, natomiast UsdPrim jest
         jiuz gotowa kompozycja.
@@ -89,20 +96,19 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
             # Prim stack zwraca w kolejnosci od namocniejszej to nahjslabszej opini pobranej z prima?
             # jakos rpzekminic jak zebrac czym ta opinia jest tzn czy lokal czy variantset etc?
             # moze dodac tu jakis sposob na zmiane ich kolejnosci zeby cos zasymulowac? Wtedy zabarwic 
-            # calosc na inny kolor?
-            # prim_path = prim.GetPath()
-            # for sub_prim_path in prim_path.split("/")
-            # prim_stack = prim.GetPrimStack()
 
     def _refresh_prim_stack(self, selection_list):
-        self.prim_stack_list.clear()
+        self.prim_stack_table.clearContents()
         selected_index = selection_list[0]
         if selected_index:
             item_object = selected_index.internalPointer()
-            if item_object:
-                print(item_object.prim_stack)
-                self.prim_stack_list.addItems(item_object.prim_stack)
-            # zmien widget listy na widgets tablicy...
+            prim_stack_list = item_object.prim_stack
+            self.prim_stack_table.setRowCount(len(prim_stack_list))
+            for row, prim_stack in enumerate(prim_stack_list):
+                for column, data_str in enumerate(prim_stack):
+                    table_item = QtWidgets.QTableWidgetItem(str(data_str))
+                    self.prim_stack_table.setItem(row, column, table_item)
+            self.prim_stack_table.resizeColumnsToContents()
 
 
 if __name__ == "__main__":
