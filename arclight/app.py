@@ -41,8 +41,8 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         self.prim_stack_table = QtWidgets.QTableWidget()
         self.prim_stack_table.setSizeAdjustPolicy(
             QtWidgets.QTableWidget.SizeAdjustPolicy.AdjustToContents)
-        self.prim_stack_table.setColumnCount(3)
-        columns_headers = ["Layer path:", "Prim path:", "Prim specifier:"]
+        self.prim_stack_table.setColumnCount(4)
+        columns_headers = ["Intorducing Layer:", "Introducing Prim", "Arc Type:", "Is Implicit"]
         self.prim_stack_table.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.prim_stack_table.setHorizontalHeaderLabels(columns_headers)
 
@@ -80,12 +80,13 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
 
         parent_nodes = {"": self.usd_tree_model.root_item}
         for prim in self.stage.TraverseAll(): # type: ignore
+            prim_composition = list(get_prim_compostion_data(prim))            
             prim_path = prim.GetPrimPath()
             parent_path = prim_path.pathString.removesuffix(f"/{prim_path.name}")
             parent_item = parent_nodes.get(parent_path)
             new_item = UsdTreeItem([prim_path.name, 
                                     prim.GetSpecifier().name,
-                                    prim.GetPrimStack()],
+                                    prim_composition],
                                     parent_item)
             parent_nodes[prim_path.pathString] = new_item
             parent_item.append_child(new_item)
