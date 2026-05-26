@@ -1,0 +1,17 @@
+#usda 1.0
+(   
+    startTimeCode = 1
+    endTimeCode   = 10
+    framesPerSecond = 24
+    timeCodesPerSecond = 24
+)
+
+def Xform "Vehicles"
+{
+    def "MonkeStronk" (
+        references = @./Suzanne_anim.usda@
+    )
+    {
+
+    }
+}

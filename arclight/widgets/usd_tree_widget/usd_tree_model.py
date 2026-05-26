@@ -59,3 +59,8 @@ class UsdTreeModel(QAbstractItemModel):
         if not index.isValid() or role != Qt.ItemDataRole.DisplayRole:
             return None
         return index.internalPointer().item_data[index.column()]
+    
+    def clear_tree(self):
+        self.beginResetModel()
+        self.removeRows(0, self.rowCount())
+        self.endResetModel()
