@@ -83,7 +83,7 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
             prim_composition = list(get_prim_compostion_data(prim))            
             prim_path = prim.GetPrimPath()
             parent_path = prim_path.pathString.removesuffix(f"/{prim_path.name}")
-            parent_item = parent_nodes.get(parent_path)
+            parent_item = parent_nodes[parent_path]
             new_item = UsdTreeItem([prim_path.name, 
                                     prim.GetSpecifier().name,
                                     prim_composition],
