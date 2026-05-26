@@ -7,6 +7,7 @@ from widgets.usd_tree_widget.usd_tree_delegate import UsdTreeDelegate
 from widgets.usd_tree_widget.usd_tree_model import UsdTreeModel
 from widgets.usd_tree_widget.usd_tree_view import UsdTreeView
 from widgets.usd_tree_widget.usd_tree_item import UsdTreeItem
+from widgets.hydra_viewport.hydra_viewport import HydraViewport
 
 
 class ArcLightMainWindow(QtWidgets.QMainWindow):
@@ -46,13 +47,28 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         self.prim_stack_table.horizontalHeader().setDefaultAlignment(QtCore.Qt.AlignmentFlag.AlignLeft)
         self.prim_stack_table.setHorizontalHeaderLabels(columns_headers)
 
-        # create main layout
-        self.main_layout = QtWidgets.QGridLayout()
-        self.central_widget.setLayout(self.main_layout)
-        self.main_layout.addWidget(self.usd_tree_view, 0, 0)
-        self.main_layout.addWidget(self.prim_stack_table, 1, 0)
+        # create hydra viewport
+        self.hydra_viewport = HydraViewport()
 
-        #connect signals
+        # left panel: tree + prim stack
+        left_panel = QtWidgets.QWidget()
+        left_layout = QtWidgets.QVBoxLayout(left_panel)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        left_layout.addWidget(self.usd_tree_view, stretch=1)
+        left_layout.addWidget(self.prim_stack_table, stretch=0)
+
+        # main splitter
+        splitter = QtWidgets.QSplitter(QtCore.Qt.Orientation.Horizontal)
+        splitter.addWidget(left_panel)
+        splitter.addWidget(self.hydra_viewport)
+        splitter.setStretchFactor(0, 1)
+        splitter.setStretchFactor(1, 2)
+
+        self.main_layout = QtWidgets.QVBoxLayout()
+        self.central_widget.setLayout(self.main_layout)
+        self.main_layout.addWidget(splitter)
+
+        # connect signals
         self.usd_tree_view.selection_changed_signal.connect(self._refresh_prim_stack)
 
     def _open_layer(self):
@@ -64,6 +80,7 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
             self.stage = open_stage(file_path)
             if self.stage:
                 self._load_stage_to_tree()
+                self.hydra_viewport.set_stage(self.stage)
                 self.stage_opened_signal.emit(True)
             else:
                 self.stage_opened_signal.emit(False)
@@ -113,6 +130,18 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
 
 
 if __name__ == "__main__":
+    # Wayland's EGL does not support desktop OpenGL context creation with NVIDIA.
+    # Force X11/GLX so QOpenGLWidget gets a proper OpenGL 3.3+ context.
+    os.environ.setdefault("QT_QPA_PLATFORM", "xcb")
+
+    # QSurfaceFormat MUST be set before QApplication is constructed.
+    from PySide6.QtGui import QSurfaceFormat
+    fmt = QSurfaceFormat()
+    fmt.setVersion(3, 3)
+    fmt.setProfile(QSurfaceFormat.OpenGLContextProfile.CoreProfile)
+    fmt.setDepthBufferSize(24)
+    QSurfaceFormat.setDefaultFormat(fmt)
+
     app = QtWidgets.QApplication(sys.argv)
     window = ArcLightMainWindow()
     window.show()
