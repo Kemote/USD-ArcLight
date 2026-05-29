@@ -28,6 +28,8 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu("File")
 
+        close_action = QtGui.QAction("Close", self)
+        close_action.
         open_action = QtGui.QAction("Open USD file", self)
         open_action.triggered.connect(self._open_layer)
         file_menu.addAction(open_action)
@@ -142,7 +144,7 @@ def setup_usd_environment(verbose=False):
 
 
 # sp[rawdzic czemu to sie nie doswierza tzn po wczytaniu stagu?
-]
+
 if __name__ == "__main__":
     # need to use that for rocky linux
     setup_usd_environment()

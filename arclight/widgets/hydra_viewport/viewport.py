@@ -22,8 +22,10 @@ class UsdViewportWidget(QtWidgets.QWidget):
         self.setLayout(widget_layout)
 
     def set_stage(self, stage):
+        self.view.closeRenderer()
         self.model.stage = stage
         self.model.currentFrame = Usd.TimeCode.EarliestTime()
+        self.view.update()
         if self.isVisible():
             self.refresh_view()
 
