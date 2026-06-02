@@ -7,7 +7,7 @@ from widgets.usd_tree_widget.usd_tree_delegate import UsdTreeDelegate
 from widgets.usd_tree_widget.usd_tree_model import UsdTreeModel
 from widgets.usd_tree_widget.usd_tree_view import UsdTreeView
 from widgets.usd_tree_widget.usd_tree_item import UsdTreeItem
-from widgets.hydra_viewport.viewport import UsdViewportWidget
+from widgets.hydra_viewport_widget.viewport import UsdViewportWidget
 
 
 class ArcLightMainWindow(QtWidgets.QMainWindow):
@@ -28,11 +28,12 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu("File")
 
-        close_action = QtGui.QAction("Close", self)
-        close_action.
-        open_action = QtGui.QAction("Open USD file", self)
+        open_action = QtGui.QAction("Load USD file", self)
         open_action.triggered.connect(self._open_layer)
+        close_action = QtGui.QAction("Close", self)
+        close_action.triggered.connect(self.close)
         file_menu.addAction(open_action)
+        file_menu.addAction(close_action)
 
         # create USD tree view
         self.usd_tree_model = UsdTreeModel(["PrimName", "PrimSpec"])
