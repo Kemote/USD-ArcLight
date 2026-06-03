@@ -1,11 +1,12 @@
 import os
-from pxr import Usd
+from pxr import Usd, UsdUtils
 
 
 def open_stage(path):
     stage = None
     if os.path.exists(path):
-        stage = Usd.Stage.Open(path)
+        with Usd.StageCacheContext(UsdUtils.StageCache.Get()):
+            stage = Usd.Stage.Open(path)
     return stage
 
 
