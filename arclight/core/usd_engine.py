@@ -2,13 +2,15 @@ import os
 from pxr import Usd, UsdUtils
 
 
-def open_stage(path):
-    stage = None
+def open_layer(path):
+    layer = None
     if os.path.exists(path):
         with Usd.StageCacheContext(UsdUtils.StageCache.Get()):
-            stage = Usd.Stage.Open(path)
-    return stage
+            layer = Usd.Stage.Open(path)
+    return layer
 
+def create_in_memmory_stage():
+    return Usd.Stage.CreateInMemory()
 
 def get_prim_compostion_data(prim: Usd.Prim):
     prim_query = Usd.PrimCompositionQuery(prim)
@@ -16,18 +18,6 @@ def get_prim_compostion_data(prim: Usd.Prim):
     for arc in arcs:
         yield PrimStackInfo(arc)
         
-    # root_node = prim_index.rootNode
-    # layer_stack = root_node.layerStack
-    # for layer in layer_stack.layers:
-    #     usd_layer = Usd.Stage.Open(layer)
-    #     prim_path = prim.GetPrimPath()
-    #     layer_prim = usd_layer.GetPrimAtPath(prim_path)
-    #     # layer prim to poodobno prim spec sprawdz to!!!
-    #     if layer_prim:
-    #         layer_index = layer_prim.GetPrimIndex()
-    #         arc = layer_index
-    #         print(arc.rootNode.arcType.name)
-
 
 class PrimStackInfo:
     def __init__(self, arc):
