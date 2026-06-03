@@ -30,3 +30,6 @@ class UsdTreeItem:
         if self.parent_item:
             return self.parent_item.child_items.index(self)
         
+    def clear_children(self):
+        self.child_items = []
+        

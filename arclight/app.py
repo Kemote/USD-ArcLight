@@ -77,7 +77,6 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         sub_layers.clear()
 
         for item_index in range(self.layer_stack.count()):
-            # TODO!! Tutaj jest babol coś się wali prz przechwyceniu nazwy
             list_item = self.layer_stack.item(item_index)
             layer_item = self.layer_stack.get_layer_item(list_item.text())
             if layer_item:
@@ -99,6 +98,8 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
             self.layer_loaded_signal.emit(file_path)            
 
     def _load_stage_to_tree(self):
+        # TODO check what is going on, now its not working correctly
+        
         """
         INFO
         Sdf.Layer.Traverse rozni sie do Usd.Stage.Traverse tym, ze ten pierwszy
