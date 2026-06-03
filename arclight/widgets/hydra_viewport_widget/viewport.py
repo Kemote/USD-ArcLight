@@ -11,16 +11,16 @@ class UsdViewportWidget(QtWidgets.QWidget):
         # create stage view
         self.model = StageView.DefaultDataModel()
         self.view = StageView(dataModel=self.model)
-
+        
         # create timeline
-        self.timeline = TimelineWidget()
-
+        self.timelineWidget = TimelineWidget()
+        self.timelineWidget.timeline.frameChanged.connect(self._frame_changed)
         if stage:
             self.set_stage(stage)
 
         widget_layout = QtWidgets.QVBoxLayout()
         widget_layout.addWidget(self.view)
-        widget_layout.addWidget(self.timeline)
+        widget_layout.addWidget(self.timelineWidget)
         widget_layout.setContentsMargins(0, 0, 0, 0)
         self.setLayout(widget_layout)
 
@@ -32,7 +32,10 @@ class UsdViewportWidget(QtWidgets.QWidget):
         # set timeline
         start = stage.GetStartTimeCode()
         end = stage.GetEndTimeCode()
-        self.timeline.set_timeline(start, end)
+        fps = stage.GetFramesPerSecond()
+        total_frames = end - start + 1
+        duration = int((total_frames / fps) * 1000)
+        self.timelineWidget.set_timeline(start, end, duration)
 
         # update view
         self.view.update()
@@ -46,17 +49,27 @@ class UsdViewportWidget(QtWidgets.QWidget):
     def refresh_view(self):
         self.view.updateView(resetCam=True, forceComputeBBox=True)
 
+    def _frame_changed(self, frame):
+        self.model.currentFrame = Usd.TimeCode(frame)
+        self.view.updateView()
+        
+
 
 class TimelineWidget(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
-        self._timeline = QtCore.QTimeLine()
-        self._play_btn = QtWidgets.QPushButton()
-        self._pause_btn = QtWidgets.QPushButton()
-        self._stop_btn = QtWidgets.QPushButton()
+        self.timeline = QtCore.QTimeLine()
+        self.timeline.frameChanged.connect(self._frame_changed)
+        self._play_btn = QtWidgets.QPushButton(">")
+        self._play_btn.clicked.connect(self._play)
+        self._pause_btn = QtWidgets.QPushButton("||")
+        self._pause_btn.clicked.connect(self._pause)
+        self._stop_btn = QtWidgets.QPushButton("P")
+        self._stop_btn.clicked.connect(self._stop)
         self._slider = QtWidgets.QSlider()
         self._slider.setOrientation(QtCore.Qt.Orientation.Horizontal)
         self._frame = QtWidgets.QLabel()
+        self._frame.setFixedWidth(50)
 
         widget_layout = QtWidgets.QHBoxLayout()
         widget_layout.addWidget(self._play_btn)
@@ -66,8 +79,25 @@ class TimelineWidget(QtWidgets.QWidget):
         widget_layout.addWidget(self._frame)
         self.setLayout(widget_layout)
 
-    def set_timeline(self, start, end):
-        self._timeline.setStartFrame = start
-        self._timeline.setEndFrame = end
+    def set_timeline(self, start, end, duration):
+        self.timeline.setStartFrame(start)
+        self.timeline.setEndFrame(end)
+        self.timeline.setDuration(duration)
         self._slider.setMinimum(start)
         self._slider.setMaximum(end)
+
+    def _play(self):
+        if self.timeline.state() == QtCore.QTimeLine.State.Running:
+            self._stop()
+        self.timeline.start()
+
+    def _pause(self):
+        self.timeline.stop()
+
+    def _stop(self):
+        self.timeline.stop()
+        self.timeline.setCurrentTime(0)
+
+    def _frame_changed(self, frame):
+        self._slider.setValue(frame)
+        self._frame.setText(str(frame))
