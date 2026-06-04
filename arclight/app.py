@@ -98,8 +98,6 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
             self.layer_loaded_signal.emit(file_path)            
 
     def _load_stage_to_tree(self):
-        # TODO check what is going on, now its not working correctly
-        
         """
         INFO
         Sdf.Layer.Traverse rozni sie do Usd.Stage.Traverse tym, ze ten pierwszy
