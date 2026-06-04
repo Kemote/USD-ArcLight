@@ -62,5 +62,5 @@ class UsdTreeModel(QAbstractItemModel):
     
     def clear_tree(self):
         self.beginResetModel()
-        self.removeRows(0, self.rowCount())
+        self.root_item.clear_children()
         self.endResetModel()
