@@ -21,6 +21,7 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         self.resize(1200, 720)
         
         self.stage = create_in_memmory_stage()
+        self.stage_sublayers = []
         self.central_widget = QtWidgets.QWidget()
         self.setCentralWidget(self.central_widget)
 
@@ -29,7 +30,7 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         file_menu = menu_bar.addMenu("File")
 
         open_action = QtGui.QAction("Load USD file", self)
-        open_action.triggered.connect(self._load_layer)
+        open_action.triggered.connect(self._open_stage)
         close_action = QtGui.QAction("Close", self)
         close_action.triggered.connect(self.close)
         file_menu.addAction(open_action)
@@ -57,7 +58,10 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
 
         # create layer stack
         self.layer_stack = LayerStackWidget()
-        self.layer_stack.model().rowsMoved.connect(self._layer_order_changed)
+        self.layer_stack.list_model.rowsMoved.connect(self._reload_sublayers)
+        self.layer_stack.load_sublayer_signal.connect(self._load_sublayer)
+        self.layer_stack.new_layer_created_signal.connect(self._load_sublayer)
+        self.layer_stack.delete_signal.connect(self._delete_sublayer)
 
         # create main layout
         self.main_layout = QtWidgets.QGridLayout()
@@ -71,24 +75,36 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         self.usd_tree_view.selection_changed_signal.connect(self._refresh_prim_stack)
         self.layer_loaded_signal.connect(self.viewport.layer_loaded)
 
-    def _layer_order_changed(self):
+    def _delete_sublayer(self):
+        self._reload_sublayers
+
+    def _open_stage(self):
+        file_path = self._get_open_dialog("Load USD file...")
+        if os.path.exists(file_path):
+            self.stage = open_layer(file_path)
+            if self.stage:
+                self.layer_stack.delete_all()
+                self.viewport.set_stage(self.stage)
+                self._load_stage_to_tree()
+                root_layer = self.stage.GetRootLayer()
+                self.stage_sublayers = root_layer.subLayerPaths
+
+    def _reload_sublayers(self):
         root_layer = self.stage.GetRootLayer()
         sub_layers = root_layer.subLayerPaths
         sub_layers.clear()
 
-        for item_index in range(self.layer_stack.count()):
-            list_item = self.layer_stack.item(item_index)
-            layer_item = self.layer_stack.get_layer_item(list_item.text())
+        for item_index in range(self.layer_stack.items_count):
+            list_item = self.layer_stack.get_item_by_index(item_index)
+            layer_item = self.layer_stack.get_layer_item(list_item)
             if layer_item:
                 sub_layers.append(layer_item.path)
         
         self._load_stage_to_tree()
 
-    def _load_layer(self):
-        open_dialog = QtWidgets.QFileDialog(self)
-        open_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.AnyFile)
-        open_dialog.setWindowTitle("Open USD file...")
-        file_path = open_dialog.getOpenFileName(filter="(*.usd *.usda *.usdc *.usdz)")[0]
+    def _load_sublayer(self, file_path=None):
+        if not file_path:
+            file_path = self._get_open_dialog("Load USD file...")
         if os.path.exists(file_path):
             # add new sublayer to main stage
             root_layer = self.stage.GetRootLayer() 
@@ -96,6 +112,13 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
             self.layer_stack.add_layer(file_path)
             self._load_stage_to_tree()
             self.layer_loaded_signal.emit(file_path)            
+
+    def _get_open_dialog(self, title):
+        open_dialog = QtWidgets.QFileDialog(self)
+        open_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.AnyFile)
+        open_dialog.setWindowTitle("Load USD file...")
+        file_path = open_dialog.getOpenFileName(filter="(*.usd *.usda *.usdc *.usdz)")[0]
+        return file_path
 
     def _load_stage_to_tree(self):
         """
