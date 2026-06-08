@@ -1,11 +1,13 @@
 import os
+from core.usd_engine import create_new_file
 from PySide6.QtCore import Signal
 from PySide6.QtWidgets import (QListWidget, 
                                QAbstractItemView, 
                                QWidget, 
                                QVBoxLayout,
                                QHBoxLayout, 
-                               QPushButton)
+                               QPushButton,
+                               QFileDialog)
 
 
 class LayerStackItem:
@@ -19,6 +21,7 @@ class LayerStackItem:
 
 class LayerStackWidget(QWidget):
     load_sublayer_signal = Signal()
+    new_layer_created_signal = Signal(str)
     delete_signal = Signal(bool)
     
     def __init__(self):
@@ -27,9 +30,12 @@ class LayerStackWidget(QWidget):
               
         load_btn = QPushButton("Add sublayer")
         load_btn.clicked.connect(self._add_sublayer)
+        new_btn = QPushButton("New sublayer")
+        new_btn.clicked.connect(self._create_new_layer)
         delete_btn = QPushButton("Delete selected")
         delete_btn.clicked.connect(self._delete)
         panel_layout = QHBoxLayout()
+        panel_layout.addWidget(new_btn)
         panel_layout.addWidget(load_btn)
         panel_layout.addWidget(delete_btn)
 
@@ -63,6 +69,15 @@ class LayerStackWidget(QWidget):
         for index in self.list.selectedIndexes():
             self.list.takeItem(index.row())
         self.delete_signal.emit(True)
+
+    def _create_new_layer(self):
+        file_path, selected_filter = QFileDialog.getSaveFileName(self,
+                                             caption="Create new layer",
+                                             dir="new_layer.usda",
+                                             filter="OpenUSD file (*.usda)")
+        if file_path:
+            create_new_file(file_path)
+            self.new_layer_created_signal.emit(file_path)
 
     def delete_all(self):
         self.list.clear()

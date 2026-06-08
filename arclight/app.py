@@ -60,6 +60,7 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         self.layer_stack = LayerStackWidget()
         self.layer_stack.list_model.rowsMoved.connect(self._reload_sublayers)
         self.layer_stack.load_sublayer_signal.connect(self._load_sublayer)
+        self.layer_stack.new_layer_created_signal.connect(self._load_sublayer)
         self.layer_stack.delete_signal.connect(self._delete_sublayer)
 
         # create main layout
@@ -101,8 +102,9 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         
         self._load_stage_to_tree()
 
-    def _load_sublayer(self):
-        file_path = self._get_open_dialog("Load USD file...")
+    def _load_sublayer(self, file_path=None):
+        if not file_path:
+            file_path = self._get_open_dialog("Load USD file...")
         if os.path.exists(file_path):
             # add new sublayer to main stage
             root_layer = self.stage.GetRootLayer() 

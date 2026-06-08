@@ -15,6 +15,14 @@ def get_prim_compostion_data(prim: Usd.Prim):
     arcs = prim_query.GetCompositionArcs()
     for arc in arcs:
         yield PrimStackInfo(arc)
+
+def create_new_file(file_path):
+    dir_name = os.path.dirname(file_path)
+    if not os.path.exists(dir_name):
+        os.makedirs(dir_name)
+    new_file = Usd.Stage.CreateNew(file_path)
+    new_file.Save()
+    return file_path
         
 
 class PrimStackInfo:
