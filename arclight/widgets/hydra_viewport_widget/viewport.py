@@ -35,13 +35,13 @@ class UsdViewportWidget(QtWidgets.QWidget):
         self.view.closeRenderer()
         self.model.stage = stage
         self.model.currentFrame = Usd.TimeCode.EarliestTime()
-        self._update_view()
+        self.update_view()
     
     def layer_loaded(self, layer_path):
         layer = open_layer(layer_path)
         self._set_layer_timeline(layer)
 
-    def _update_view(self):
+    def update_view(self):
         self.view.update()
         if self.isVisible():
             self.view.updateView(resetCam=True, forceComputeBBox=True)

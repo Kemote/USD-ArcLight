@@ -16,6 +16,6 @@ ALBO przemysl czy jest sens to robi co pwoyzej, moze lepiej ejsli cos jest refer
 
 ~~6. dac mozliwosc dodawani nowych pliku usda~~
 
-7. dac mozliwosc odswierzania
+~~7. dac mozliwosc odswierzania~~
 
-8. delete nie odswierza widoku?
+~~8. delete nie odswierza widoku?~~

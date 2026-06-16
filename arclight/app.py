@@ -76,10 +76,11 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         self.layer_loaded_signal.connect(self.viewport.layer_loaded)
 
     def _delete_sublayer(self):
-        self._reload_sublayers
+        self._reload_sublayers()
+        self.viewport.update_view()
 
     def _open_stage(self):
-        file_path = self._get_open_dialog("Load USD file...")
+        file_path = self._get_open_dialog("Open USD file...")
         if os.path.exists(file_path):
             self.stage = open_layer(file_path)
             if self.stage:
@@ -110,13 +111,13 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
             root_layer = self.stage.GetRootLayer() 
             root_layer.subLayerPaths.append(file_path)
             self.layer_stack.add_layer(file_path)
-            self._load_stage_to_tree()
+            self._reload_sublayers()
             self.layer_loaded_signal.emit(file_path)            
 
     def _get_open_dialog(self, title):
         open_dialog = QtWidgets.QFileDialog(self)
         open_dialog.setFileMode(QtWidgets.QFileDialog.FileMode.AnyFile)
-        open_dialog.setWindowTitle("Load USD file...")
+        open_dialog.setWindowTitle(title)
         file_path = open_dialog.getOpenFileName(filter="(*.usd *.usda *.usdc *.usdz)")[0]
         return file_path
 
