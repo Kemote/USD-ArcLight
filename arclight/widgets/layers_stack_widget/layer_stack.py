@@ -22,7 +22,7 @@ class LayerStackItem:
 class LayerStackWidget(QWidget):
     load_sublayer_signal = Signal()
     new_layer_created_signal = Signal(str)
-    delete_signal = Signal(bool)
+    delete_signal = Signal()
     
     def __init__(self):
         super().__init__()
@@ -66,9 +66,9 @@ class LayerStackWidget(QWidget):
         self.load_sublayer_signal.emit()
 
     def _delete(self):
-        for index in self.list.selectedIndexes():
-            self.list.takeItem(index.row())
-        self.delete_signal.emit(True)
+        for item in self.list.selectedItems() or []:
+            self.list.takeItem(self.list.row(item))
+        self.delete_signal.emit()
 
     def _create_new_layer(self):
         file_path, selected_filter = QFileDialog.getSaveFileName(self,
