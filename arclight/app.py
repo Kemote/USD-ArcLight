@@ -29,11 +29,17 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         menu_bar = self.menuBar()
         file_menu = menu_bar.addMenu("File")
 
-        open_action = QtGui.QAction("Load USD file", self)
+        open_action = QtGui.QAction("Load USD stage", self)
         open_action.triggered.connect(self._open_stage)
+        new_stage_action = QtGui.QAction("New USD stage", self)
+        new_stage_action.triggered.connect(self._new_stage)
+        save_stage_action = QtGui.QAction("Save stage", self)
+        save_stage_action.triggered.connect(self._save_stage)
         close_action = QtGui.QAction("Close", self)
         close_action.triggered.connect(self.close)
         file_menu.addAction(open_action)
+        file_menu.addAction(new_stage_action)
+        file_menu.addAction(save_stage_action)
         file_menu.addAction(close_action)
 
         # create USD tree view
@@ -89,6 +95,26 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
                 self._load_stage_to_tree()
                 root_layer = self.stage.GetRootLayer()
                 self.stage_sublayers = root_layer.subLayerPaths
+        self.setWindowTitle(f"ArcLight - USD Composition Explorer {file_path}")
+
+    def _new_stage(self):
+        self.stage = create_in_memmory_stage()
+        self._reload_sublayers()
+        self.viewport.set_stage(self.stage)
+        self.setWindowTitle("ArcLight - USD Composition Explorer")
+
+    def _save_stage(self):
+        root_layer = self.stage.GetRootLayer()
+        path = root_layer.realPath
+        if path:
+            self.stage.GetRootLayer().Save()
+        else:
+            file_path, selected_filter = QtWidgets.QFileDialog.getSaveFileName(self,
+                                                                               caption="Save as",
+                                                                               dir="new_file.usda",
+                                                                               filter="(*.usd *.usda *.usdc *.usdz)")
+            if file_path:
+                self.stage.GetRootLayer().Export(file_path)
 
     def _reload_sublayers(self):
         root_layer = self.stage.GetRootLayer()

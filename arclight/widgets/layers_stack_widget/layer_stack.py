@@ -34,6 +34,7 @@ class LayerStackWidget(QWidget):
         new_btn.clicked.connect(self._create_new_layer)
         delete_btn = QPushButton("Delete selected")
         delete_btn.clicked.connect(self._delete)
+        
         panel_layout = QHBoxLayout()
         panel_layout.addWidget(new_btn)
         panel_layout.addWidget(load_btn)
