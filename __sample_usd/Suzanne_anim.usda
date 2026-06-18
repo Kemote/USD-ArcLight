@@ -6,9 +6,7 @@
     framesPerSecond = 24
     timeCodesPerSecond = 24
     doc = """Animation override: Suzanne — exported from Blender"""
-    subLayers = [
-        @./Suzanne_asset.usda@
-    ]
+
 )
 
 over "Suzanne"

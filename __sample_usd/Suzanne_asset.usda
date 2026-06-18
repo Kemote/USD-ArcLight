@@ -1,6 +1,10 @@
 #usda 1.0
 (
     defaultPrim = "Suzanne"
+    startTimeCode = 1
+    endTimeCode   = 10
+    framesPerSecond = 24
+    timeCodesPerSecond = 24
     upAxis = "Z"
     metersPerUnit = 0.01
     doc = """Asset: Suzanne — exported from Blender"""
