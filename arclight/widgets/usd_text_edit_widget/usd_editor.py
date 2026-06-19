@@ -64,6 +64,9 @@ class LineNumberArea(QWidget):
     def paintEvent(self, event):
         self.editor.lineNumberAreaPaintEvent(event)
 
+    def mousePressEvent(self, event):
+        self.editor.line_number_area_mouse_press(event)
+
 
 class USDEditorWidget(QPlainTextEdit):
     def __init__(self, parent=None, color_palette_name="light"):
@@ -71,11 +74,10 @@ class USDEditorWidget(QPlainTextEdit):
         self.colors = color_palette[color_palette_name]
         self.line_number_area = LineNumberArea(self)
 
-        # UI Initialization
         self.setup_font()
         self.highlighter = USDSyntaxHighlighter(self.document(), colors=self.colors)
-        
-        # Signals for line numbering
+
+        # signals for line numbering
         self.blockCountChanged.connect(self.update_line_number_area_width)
         self.updateRequest.connect(self.update_line_number_area)
         self.cursorPositionChanged.connect(self.highlight_current_line)
