@@ -13,7 +13,8 @@ class UsdViewportWidget(QtWidgets.QWidget):
         # create stage view
         self.model = StageView.DefaultDataModel()
         self.view = StageView(dataModel=self.model)
-        
+        self.setMinimumWidth(600)
+
         # create timeline
         self.timelineWidget = TimelineWidget()
         self.timelineWidget.timeline.frameChanged.connect(self._frame_changed)

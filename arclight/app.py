@@ -8,18 +8,19 @@ from widgets.usd_tree_widget.usd_tree_view import UsdTreeView
 from widgets.usd_tree_widget.usd_tree_item import UsdTreeItem
 from widgets.hydra_viewport_widget.viewport import UsdViewportWidget
 from widgets.layers_stack_widget.layer_stack import LayerStackWidget
+from widgets.usd_text_edit_widget.usd_editor import USDEditorWidget
 from core.usd_engine import *
 
 
 class ArcLightMainWindow(QtWidgets.QMainWindow):
     layer_loaded_signal = QtCore.Signal(str)
+    stage_changed_signal = QtCore.Signal(str)
 
     def __init__(self, parent=None):
         super().__init__(parent)
 
         self.setWindowTitle("ArcLight - USD Composition Explorer")
-        self.resize(1200, 720)
-        
+        self.resize(1800, 720)
         self.stage = create_in_memmory_stage()
         self.stage_sublayers = []
         self.central_widget = QtWidgets.QWidget()
@@ -69,6 +70,9 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         self.layer_stack.new_layer_created_signal.connect(self._load_sublayer)
         self.layer_stack.delete_signal.connect(self._delete_sublayer)
 
+        # create plain text USD view
+        self.usd_text_edit = USDEditorWidget()
+
         # create main layout
         self.main_layout = QtWidgets.QGridLayout()
         self.central_widget.setLayout(self.main_layout)
@@ -76,11 +80,16 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
         self.main_layout.addWidget(self.prim_stack_table, 1, 0)
         self.main_layout.addWidget(self.viewport, 0, 1)
         self.main_layout.addWidget(self.layer_stack, 1, 1)
+        self.main_layout.addWidget(self.usd_text_edit, 0, 2, 1, 2)
+        self.main_layout.setColumnStretch(0, 1)
+        self.main_layout.setColumnStretch(1, 1)
+        self.main_layout.setColumnStretch(2, 2)
 
         #connect signals
         self.usd_tree_view.selection_changed_signal.connect(self._refresh_prim_stack)
         self.layer_loaded_signal.connect(self.viewport.layer_loaded)
-
+        self.stage_changed_signal.connect(self.usd_text_edit.set_usd_string)
+        
     def _delete_sublayer(self):
         self._reload_sublayers()
         self.viewport.update_view()
@@ -137,7 +146,7 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
             root_layer = self.stage.GetRootLayer() 
             root_layer.subLayerPaths.append(file_path)
             self.layer_stack.add_layer(file_path)
-            self._reload_sublayers()
+            # self._reload_sublayers()
             self.layer_loaded_signal.emit(file_path)            
 
     def _get_open_dialog(self, title):
@@ -169,6 +178,8 @@ class ArcLightMainWindow(QtWidgets.QMainWindow):
                                     parent_item)
             parent_nodes[prim_path.pathString] = new_item
             parent_item.append_child(new_item)
+        
+        self.stage_changed_signal.emit(self.stage.ExportToString())
             
     def _refresh_prim_stack(self, selection_list):
         self.prim_stack_table.clearContents()
